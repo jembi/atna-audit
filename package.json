@@ -14,5 +14,18 @@
   "devDependencies": {
     "eslint": "^1.7.3",
     "libxmljs": "^0.15.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jembi/atna-audit.git"
+  },
+  "keywords": [
+    "atna",
+    "audit",
+    "ihe"
+  ],
+  "bugs": {
+    "url": "https://github.com/jembi/atna-audit/issues"
+  },
+  "homepage": "https://github.com/jembi/atna-audit#readme"
 }
