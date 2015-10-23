@@ -8,10 +8,10 @@ atna.disableValidation();
 let syslog = atna.wrapInSyslog('test');
 console.log(syslog);
 
-let audit = atna.userLoginAudit(0, 'openhim', 'x.x.x.x', 'testUser', 'testRole', '123');
+let audit = atna.userLoginAudit(0, 'openhim', 'openhim.org', 'testUser', 'testRole', '123');
 atna.validateAudit(audit);
 console.log(audit);
 
-audit = atna.appActivityAudit(true, 'openhim', 'x.x.x.x');
+audit = atna.appActivityAudit(true, 'openhim', 'openhim.org');
 atna.validateAudit(audit);
 console.log(audit);

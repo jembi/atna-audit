@@ -150,13 +150,13 @@ function wrapInSyslog(msg) {
 }
 exports.wrapInSyslog = wrapInSyslog;
 
-exports.userLoginAudit = function(outcome, sysname, sysIp, username, userRole, userRoleCode) {
+exports.userLoginAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode) {
   let eventID = new Code(110114, 'UserAuthenticated', 'DCM');
   let typeCode = new Code(110122, 'Login', 'DCM');
   let eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
 
   let sysRoleCode = new Code(110150, 'Application', 'DCM');
-  let sysParticipant = new ActiveParticipant(sysname, '', true, sysIp, 2, [sysRoleCode]);
+  let sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
 
   let userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
   let userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
@@ -173,7 +173,7 @@ exports.userLoginAudit = function(outcome, sysname, sysIp, username, userRole, u
   return xml;
 };
 
-exports.appActivityAudit = function(isStart, sysname, sysIp, username) {
+exports.appActivityAudit = function(isStart, sysname, hostname, username) {
   if (!username) {
     username = 'root';
   }
@@ -188,7 +188,7 @@ exports.appActivityAudit = function(isStart, sysname, sysIp, username) {
   let eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
 
   let sysRoleCode = new Code(110150, 'Application', 'DCM');
-  let sysParticipant = new ActiveParticipant(sysname, '', true, sysIp, 2, [sysRoleCode]);
+  let sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
 
   let userRoleCodeDef = new Code(110151, 'Application Launcher', 'DCM');
   let userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
