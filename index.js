@@ -7,8 +7,8 @@ const fs = require('fs');
 
 var validate = true;
 
-exports.disableValidation = () => {validate = false;};
-exports.enableValidation = () => {validate = true;};
+exports.disableValidation = () => validate = false;
+exports.enableValidation = () => validate = true;
 
 function Code(code, displayName, codeSystemName) {
   this['@'] = {
@@ -136,7 +136,7 @@ AuditMessage.prototype.toXML = function() {
 exports.AuditMessage = AuditMessage;
 
 function validateAudit(auditXml) {
-  var xsd = fs.readFileSync('rfc-3881.xsd').toString();
+  var xsd = fs.readFileSync(`${__dirname}/rfc-3881.xsd`).toString();
   var xsdDoc = libxml.parseXml(xsd);
   var xml = libxml.parseXml(auditXml);
   if (!xml.validate(xsdDoc)) {
@@ -153,7 +153,7 @@ exports.wrapInSyslog = wrapInSyslog;
 exports.userLoginAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode) {
   let eventID = new Code(110114, 'UserAuthenticated', 'DCM');
   let typeCode = new Code(110122, 'Login', 'DCM');
-  let eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
+  let eIdent = new EventIdentification('E', new Date(), outcome, eventID, typeCode);
 
   let sysRoleCode = new Code(110150, 'Application', 'DCM');
   let sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
