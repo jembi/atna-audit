@@ -5,6 +5,11 @@ const os = require('os');
 const libxml = require('libxmljs');
 const fs = require('fs');
 
+var validate = true;
+
+exports.disableValidation = () => {validate = false;};
+exports.enableValidation = () => {validate = true;};
+
 function Code(code, displayName, codeSystemName) {
   this['@'] = {
     code: code,
@@ -17,6 +22,18 @@ Code.prototype.toXML = function() {
   return js2xml('Code', this);
 };
 exports.Code = Code;
+
+function TypeValue(type, val) {
+  this['@'] = {
+    type: type,
+    value: val
+  };
+}
+TypeValue.prototype.constructor = TypeValue;
+TypeValue.prototype.toXML = function() {
+  return js2xml('TypeValue', this);
+};
+exports.TypeValue = TypeValue;
 
 function EventIdentification(actionCode, datetime, outcome, eventID, typeCode) {
   this['@'] = {
@@ -53,6 +70,38 @@ ActiveParticipant.prototype.toXML = function() {
 };
 exports.ActiveParticipant = ActiveParticipant;
 
+function ParticipantObjectIdentification(objId, objTypeCode, objTypeCodeRole, objDataLifeCycle, objSensitivity, objIdTypeCode, objName, objQuery, objDetails) {
+  this['@'] = {
+    ParticipantObjectID: objId
+  };
+  if (objTypeCode) {
+    this['@'].ParticipantObjectTypeCode = objTypeCode;
+  }
+  if (objTypeCodeRole) {
+    this['@'].ParticipantObjectTypeCodeRole = objTypeCodeRole;
+  }
+  if (objDataLifeCycle) {
+    this['@'].ParticipantObjectDataLifeCycle = objDataLifeCycle;
+  }
+  if (objSensitivity) {
+    this['@'].ParticipantObjectSensitivity = objSensitivity;
+  }
+  this.ParticipantObjectIDTypeCode = objIdTypeCode;
+  if (objName) {
+    this.ParticipantObjectName = objName;
+  } else if (objQuery) {
+    this.ParticipantObjectQuery = objQuery;
+  }
+  if (objDetails && objDetails.length > 0) {
+    this.ParticipantObjectDetail = objDetails;
+  }
+}
+ParticipantObjectIdentification.prototype.constructor = ParticipantObjectIdentification;
+ParticipantObjectIdentification.prototype.toXML = function() {
+  return js2xml('ParticipantObjectIdentification', this);
+};
+exports.ParticipantObjectIdentification = ParticipantObjectIdentification;
+
 function AuditSourceIdentification(auditEnterpriseSiteId, auditSourceId, auditSourceTypeCode) {
   this['@'] = {
     AuditEnterpriseSiteID: auditEnterpriseSiteId,
@@ -87,7 +136,7 @@ AuditMessage.prototype.toXML = function() {
 exports.AuditMessage = AuditMessage;
 
 function validateAudit(auditXml) {
-  var xsd = fs.readFileSync('rcf-3881.xsd').toString();
+  var xsd = fs.readFileSync('rfc-3881.xsd').toString();
   var xsdDoc = libxml.parseXml(xsd);
   var xml = libxml.parseXml(auditXml);
   if (!xml.validate(xsdDoc)) {
@@ -105,14 +154,53 @@ exports.userLoginAudit = function(outcome, sysname, sysIp, username, userRole, u
   let eventID = new Code(110114, 'UserAuthenticated', 'DCM');
   let typeCode = new Code(110122, 'Login', 'DCM');
   let eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
+
   let sysRoleCode = new Code(110150, 'Application', 'DCM');
   let sysParticipant = new ActiveParticipant(sysname, '', true, sysIp, 2, [sysRoleCode]);
+
   let userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
   let userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
+
   let sourceTypeCode = new Code(1, '', '');
   let sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
+
   let audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
+
   let xml = audit.toXML();
-  validateAudit(xml);
+  if (validate) {
+    validateAudit(xml);
+  }
+  return xml;
+};
+
+exports.appActivityAudit = function(isStart, sysname, sysIp, username) {
+  if (!username) {
+    username = 'root';
+  }
+
+  let eventID = new Code(110100, 'Application Activity', 'DCM');
+  let typeCode;
+  if (isStart) {
+    typeCode = new Code(110120, 'Application Start', 'DCM');
+  } else {
+    typeCode = new Code(110121, 'Application Stop', 'DCM');
+  }
+  let eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
+
+  let sysRoleCode = new Code(110150, 'Application', 'DCM');
+  let sysParticipant = new ActiveParticipant(sysname, '', true, sysIp, 2, [sysRoleCode]);
+
+  let userRoleCodeDef = new Code(110151, 'Application Launcher', 'DCM');
+  let userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
+
+  let sourceTypeCode = new Code(3, '', '');
+  let sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
+
+  let audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
+
+  let xml = audit.toXML();
+  if (validate) {
+    validateAudit(xml);
+  }
   return xml;
 };
