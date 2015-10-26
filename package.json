@@ -1,6 +1,6 @@
 {
   "name": "atna-audit",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Assists in the creation of ATNA audit trail messages for IHE profiles.",
   "main": "index.js",
   "scripts": {
