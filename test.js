@@ -2,9 +2,6 @@
 
 var atna = require('./index');
 
-// Validate manually so the test fail here
-atna.disableValidation();
-
 var syslog = atna.wrapInSyslog('test');
 console.log(syslog);
 

@@ -5,11 +5,6 @@ var os = require('os');
 var libxml = require('libxmljs');
 var fs = require('fs');
 
-var validate = true;
-
-exports.disableValidation = function() { validate = false; };
-exports.enableValidation = function() { validate = true; };
-
 function Code(code, displayName, codeSystemName) {
   this['@'] = {
     code: code,
@@ -165,12 +160,7 @@ exports.userLoginAudit = function(outcome, sysname, hostname, username, userRole
   var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
-
-  var xml = audit.toXML();
-  if (validate) {
-    validateAudit(xml);
-  }
-  return xml;
+  return  audit.toXML();
 };
 
 exports.appActivityAudit = function(isStart, sysname, hostname, username) {
@@ -197,10 +187,5 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
   var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
-
-  var xml = audit.toXML();
-  if (validate) {
-    validateAudit(xml);
-  }
-  return xml;
+  return audit.toXML();
 };
