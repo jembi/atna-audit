@@ -5,6 +5,55 @@ var os = require('os');
 var libxml = require('libxmljs');
 var fs = require('fs');
 
+// Event Outcome Indicator
+exports.OUTCOME_SUCCESS = 0;
+exports.OUTCOME_MINOR_FAILURE = 4;
+exports.OUTCOME_SERIOUS_FAILURE = 8;
+exports.OUTCOME_MAJOR_FAILURE = 12;
+
+// Network Access Point Type Code
+exports.EVENT_ACTION_CREATE = 'C';
+exports.EVENT_ACTION_READ = 'R';
+exports.EVENT_ACTION_UPDATE = 'U';
+exports.EVENT_ACTION_DELETE = 'D';
+exports.EVENT_ACTION_EXECUTE = 'E';
+
+// Network Access Point Type Code
+exports.NET_AP_TYPE_DNS = 1;
+exports.NET_AP_TYPE_IP = 2;
+exports.NET_AP_TYPE_TEL = 3;
+
+// Audit Source Type Code
+exports.AUDIT_SRC_TYPE_UI = 1;
+exports.AUDIT_SRC_TYPE_DATA_AQUISITION = 2;
+exports.AUDIT_SRC_TYPE_WEB_SERVER = 3;
+exports.AUDIT_SRC_TYPE_APP_SERVER = 4;
+exports.AUDIT_SRC_TYPE_DB_SERVER = 5;
+exports.AUDIT_SRC_TYPE_SECURITY_SERVER = 6;
+exports.AUDIT_SRC_TYPE_NET_COMP = 7;
+exports.AUDIT_SRC_TYPE_OS = 8;
+exports.AUDIT_SRC_TYPE_EXTERN = 9;
+
+// Participant Object Type Code
+exports.OBJ_TYPE_PERSON = 1;
+exports.OBJ_TYPE_SYS_OBJ = 2;
+exports.OBJ_TYPE_ORG = 3;
+exports.OBJ_TYPE_OTHER = 4;
+
+// Participant Object ID Type Code
+exports.OBJ_ID_TYPE_MRN = 1;
+exports.OBJ_ID_TYPE_PAT_NUM = 2;
+exports.OBJ_ID_TYPE_ENCOUNTER_NUM = 3;
+exports.OBJ_ID_TYPE_ENROLLEE_NUM = 4;
+exports.OBJ_ID_TYPE_SSN = 5;
+exports.OBJ_ID_TYPE_ACC_NUM = 6;
+exports.OBJ_ID_TYPE_GUARANTOR_NUM = 7;
+exports.OBJ_ID_TYPE_REPORT_NAME = 8;
+exports.OBJ_ID_TYPE_REPORT_NUM = 9;
+exports.OBJ_ID_TYPE_SEARCH_CRIT = 10;
+exports.OBJ_ID_TYPE_USER_ID = 11;
+exports.OBJ_ID_TYPE_URI = 12;
+
 function Code(code, displayName, codeSystemName) {
   this['@'] = {
     code: code,
@@ -151,12 +200,12 @@ exports.userLoginAudit = function(outcome, sysname, hostname, username, userRole
   var eIdent = new EventIdentification('E', new Date(), outcome, eventID, typeCode);
 
   var sysRoleCode = new Code(110150, 'Application', 'DCM');
-  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
+  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
 
   var userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
   var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
 
-  var sourceTypeCode = new Code(1, '', '');
+  var sourceTypeCode = new Code(exports.AUDIT_SRC_TYPE_UI, '', '');
   var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
@@ -175,15 +224,15 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
   } else {
     typeCode = new Code(110121, 'Application Stop', 'DCM');
   }
-  var eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
+  var eIdent = new EventIdentification('E', new Date(), exports.OUTCOME_SUCCESS, eventID, typeCode);
 
   var sysRoleCode = new Code(110150, 'Application', 'DCM');
-  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
+  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
 
   var userRoleCodeDef = new Code(110151, 'Application Launcher', 'DCM');
   var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
 
-  var sourceTypeCode = new Code(3, '', '');
+  var sourceTypeCode = new Code(exports.AUDIT_SRC_TYPE_WEB_SERVER, '', '');
   var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
