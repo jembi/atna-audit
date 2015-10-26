@@ -1,14 +1,14 @@
 'use strict';
 
-const js2xml = require('js2xmlparser');
-const os = require('os');
-const libxml = require('libxmljs');
-const fs = require('fs');
+var js2xml = require('js2xmlparser');
+var os = require('os');
+var libxml = require('libxmljs');
+var fs = require('fs');
 
 var validate = true;
 
-exports.disableValidation = () => validate = false;
-exports.enableValidation = () => validate = true;
+exports.disableValidation = function() { validate = false; };
+exports.enableValidation = function() { validate = true; };
 
 function Code(code, displayName, codeSystemName) {
   this['@'] = {
@@ -136,37 +136,37 @@ AuditMessage.prototype.toXML = function() {
 exports.AuditMessage = AuditMessage;
 
 function validateAudit(auditXml) {
-  var xsd = fs.readFileSync(`${__dirname}/rfc-3881.xsd`).toString();
+  var xsd = fs.readFileSync(__dirname + '/rfc-3881.xsd').toString();
   var xsdDoc = libxml.parseXml(xsd);
   var xml = libxml.parseXml(auditXml);
   if (!xml.validate(xsdDoc)) {
-    throw new Error(`XML audit not valid according to XSD: \n ${xml.validationErrors}`);
+    throw new Error('XML audit not valid according to XSD:\n' + xml.validationErrors);
   }
 }
 exports.validateAudit = validateAudit;
 
 function wrapInSyslog(msg) {
-  return `<85>1 ${new Date().toISOString()} ${os.hostname()} atna-audit.js ${process.pid} IHE+RFC-3881 - ${msg}`;
+  return '<85>1 ' + new Date().toISOString() + ' ' + os.hostname() + ' atna-audit.js ' + process.pid + ' IHE+RFC-3881 - ' + msg;
 }
 exports.wrapInSyslog = wrapInSyslog;
 
 exports.userLoginAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode) {
-  let eventID = new Code(110114, 'UserAuthenticated', 'DCM');
-  let typeCode = new Code(110122, 'Login', 'DCM');
-  let eIdent = new EventIdentification('E', new Date(), outcome, eventID, typeCode);
+  var eventID = new Code(110114, 'UserAuthenticated', 'DCM');
+  var typeCode = new Code(110122, 'Login', 'DCM');
+  var eIdent = new EventIdentification('E', new Date(), outcome, eventID, typeCode);
 
-  let sysRoleCode = new Code(110150, 'Application', 'DCM');
-  let sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
+  var sysRoleCode = new Code(110150, 'Application', 'DCM');
+  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
 
-  let userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
-  let userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
+  var userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
+  var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
 
-  let sourceTypeCode = new Code(1, '', '');
-  let sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
+  var sourceTypeCode = new Code(1, '', '');
+  var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
-  let audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
+  var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
 
-  let xml = audit.toXML();
+  var xml = audit.toXML();
   if (validate) {
     validateAudit(xml);
   }
@@ -178,27 +178,27 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
     username = 'root';
   }
 
-  let eventID = new Code(110100, 'Application Activity', 'DCM');
-  let typeCode;
+  var eventID = new Code(110100, 'Application Activity', 'DCM');
+  var typeCode;
   if (isStart) {
     typeCode = new Code(110120, 'Application Start', 'DCM');
   } else {
     typeCode = new Code(110121, 'Application Stop', 'DCM');
   }
-  let eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
+  var eIdent = new EventIdentification('E', new Date(), 0, eventID, typeCode);
 
-  let sysRoleCode = new Code(110150, 'Application', 'DCM');
-  let sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
+  var sysRoleCode = new Code(110150, 'Application', 'DCM');
+  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, 1, [sysRoleCode]);
 
-  let userRoleCodeDef = new Code(110151, 'Application Launcher', 'DCM');
-  let userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
+  var userRoleCodeDef = new Code(110151, 'Application Launcher', 'DCM');
+  var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
 
-  let sourceTypeCode = new Code(3, '', '');
-  let sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
+  var sourceTypeCode = new Code(3, '', '');
+  var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
-  let audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
+  var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
 
-  let xml = audit.toXML();
+  var xml = audit.toXML();
   if (validate) {
     validateAudit(xml);
   }
