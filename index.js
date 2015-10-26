@@ -197,7 +197,7 @@ exports.wrapInSyslog = wrapInSyslog;
 exports.userLoginAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode) {
   var eventID = new Code(110114, 'UserAuthenticated', 'DCM');
   var typeCode = new Code(110122, 'Login', 'DCM');
-  var eIdent = new EventIdentification('E', new Date(), outcome, eventID, typeCode);
+  var eIdent = new EventIdentification(exports.EVENT_ACTION_EXECUTE, new Date(), outcome, eventID, typeCode);
 
   var sysRoleCode = new Code(110150, 'Application', 'DCM');
   var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
@@ -224,7 +224,7 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
   } else {
     typeCode = new Code(110121, 'Application Stop', 'DCM');
   }
-  var eIdent = new EventIdentification('E', new Date(), exports.OUTCOME_SUCCESS, eventID, typeCode);
+  var eIdent = new EventIdentification(exports.EVENT_ACTION_EXECUTE, new Date(), exports.OUTCOME_SUCCESS, eventID, typeCode);
 
   var sysRoleCode = new Code(110150, 'Application', 'DCM');
   var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
