@@ -2,7 +2,6 @@
 
 var js2xml = require('js2xmlparser');
 var os = require('os');
-var libxml = require('libxmljs');
 var fs = require('fs');
 
 // Event Outcome Indicator
@@ -178,16 +177,6 @@ AuditMessage.prototype.toXML = function() {
   return js2xml('AuditMessage', this);
 };
 exports.AuditMessage = AuditMessage;
-
-function validateAudit(auditXml) {
-  var xsd = fs.readFileSync(__dirname + '/rfc-3881.xsd').toString();
-  var xsdDoc = libxml.parseXml(xsd);
-  var xml = libxml.parseXml(auditXml);
-  if (!xml.validate(xsdDoc)) {
-    throw new Error('XML audit not valid according to XSD:\n' + xml.validationErrors);
-  }
-}
-exports.validateAudit = validateAudit;
 
 function wrapInSyslog(msg) {
   return '<85>1 ' + new Date().toISOString() + ' ' + os.hostname() + ' atna-audit.js ' + process.pid + ' IHE+RFC-3881 - ' + msg;
