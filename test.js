@@ -20,7 +20,7 @@ function validateAudit(auditXml, callback) {
 
 tap.test('should wrap an audit message in syslog format', function (t) {
   var syslog = atna.wrapInSyslog('test');
-  t.match(syslog, /<85>1 .* ryan-Latitude-E6540 atna-audit\.js \d* IHE\+RFC-3881 - test/);
+  t.match(syslog, /<85>1 \S* \S* atna-audit\.js \d* IHE\+RFC-3881 - test/);
   t.end();
 });
 
