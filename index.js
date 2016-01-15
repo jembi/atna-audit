@@ -2,7 +2,6 @@
 
 var js2xml = require('js2xmlparser');
 var os = require('os');
-var fs = require('fs');
 
 // Event Outcome Indicator
 exports.OUTCOME_SUCCESS = 0;
@@ -53,12 +52,15 @@ exports.OBJ_ID_TYPE_SEARCH_CRIT = 10;
 exports.OBJ_ID_TYPE_USER_ID = 11;
 exports.OBJ_ID_TYPE_URI = 12;
 
-function Code(code, displayName, codeSystemName) {
+function Code(code, originalText, codeSystemName, displayName) {
   this['@'] = {
-    code: code,
-    displayName: displayName,
+    'csd-code': code,
+    originalText: originalText,
     codeSystemName: codeSystemName
   };
+  if (displayName) {
+    this['@'].displayName = displayName;
+  }
 }
 Code.prototype.constructor = Code;
 Code.prototype.toXML = function() {
@@ -148,9 +150,11 @@ exports.ParticipantObjectIdentification = ParticipantObjectIdentification;
 function AuditSourceIdentification(auditEnterpriseSiteId, auditSourceId, auditSourceTypeCode) {
   this['@'] = {
     AuditEnterpriseSiteID: auditEnterpriseSiteId,
-    AuditSourceID: auditSourceId
+    AuditSourceID: auditSourceId,
+    code: auditSourceTypeCode['@']['csd-code'],
+    codeSystemName: auditSourceTypeCode['@'].codeSystemName,
+    originalText: auditSourceTypeCode['@'].originalText
   };
-  this.AuditSourceTypeCode = auditSourceTypeCode;
 }
 AuditSourceIdentification.prototype.constructor = AuditSourceIdentification;
 AuditSourceIdentification.prototype.toXML = function() {
