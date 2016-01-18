@@ -38,6 +38,29 @@ exports.OBJ_TYPE_SYS_OBJ = 2;
 exports.OBJ_TYPE_ORG = 3;
 exports.OBJ_TYPE_OTHER = 4;
 
+// Participant Object Type Code Role
+exports.OBJ_TYPE_CODE_ROLE_PATIENT = 1;
+exports.OBJ_TYPE_CODE_ROLE_LOCATION = 2;
+exports.OBJ_TYPE_CODE_ROLE_REPORT = 3;
+exports.OBJ_TYPE_CODE_ROLE_RESOURCE = 4;
+exports.OBJ_TYPE_CODE_ROLE_MASTER_FILE = 5;
+exports.OBJ_TYPE_CODE_ROLE_USER = 6;
+exports.OBJ_TYPE_CODE_ROLE_LIST = 7;
+exports.OBJ_TYPE_CODE_ROLE_DOCTOR = 8;
+exports.OBJ_TYPE_CODE_ROLE_SUBSCRIBER = 9;
+exports.OBJ_TYPE_CODE_ROLE_GUARANTOR = 10;
+exports.OBJ_TYPE_CODE_ROLE_SECURITY_USER_ENTITY = 11;
+exports.OBJ_TYPE_CODE_ROLE_SECURITY_USER_GROUP = 12;
+exports.OBJ_TYPE_CODE_ROLE_SECURITY_RESOURCE = 13;
+exports.OBJ_TYPE_CODE_ROLE_SECURITY_GRANULARITY = 14;
+exports.OBJ_TYPE_CODE_ROLE_PROVIDER = 15;
+exports.OBJ_TYPE_CODE_ROLE_DATA_DESTINATION = 16;
+exports.OBJ_TYPE_CODE_ROLE_DATA_REPOSITORY = 17;
+exports.OBJ_TYPE_CODE_ROLE_SCHEDULE = 18;
+exports.OBJ_TYPE_CODE_ROLE_CUSTOMER = 19;
+exports.OBJ_TYPE_CODE_ROLE_JOB = 20;
+exports.OBJ_TYPE_CODE_ROLE_JOB_STREAM = 21;
+
 // Participant Object ID Type Code
 exports.OBJ_ID_TYPE_MRN = 1;
 exports.OBJ_ID_TYPE_PAT_NUM = 2;
@@ -87,7 +110,9 @@ function EventIdentification(actionCode, datetime, outcome, eventID, typeCode) {
     EventOutcomeIndicator: outcome
   };
   this.EventID = eventID;
-  this.EventTypeCode = typeCode;
+  if (typeCode) {
+    this.EventTypeCode = typeCode;
+  }
 }
 EventIdentification.prototype.constructor = EventIdentification;
 EventIdentification.prototype.toXML = function() {
@@ -230,4 +255,24 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
 
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
   return audit.toXML();
+};
+
+exports.auditLogUsedAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode, auditLogURI, objQuery, objDetails) {
+  var eventID = new Code(110101, 'Audit Log Used', 'DCM');
+  var eIdent = new EventIdentification(exports.EVENT_ACTION_READ, new Date(), outcome, eventID, null);
+
+  var sysRoleCode = new Code(110150, 'Application', 'DCM');
+  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
+
+  var userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
+  var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
+
+  var sourceTypeCode = new Code(exports.AUDIT_SRC_TYPE_UI, '', '');
+  var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
+
+  var participantObj = new ParticipantObjectIdentification(
+    auditLogURI, exports.OBJ_TYPE_SYS_OBJ, exports.OBJ_TYPE_CODE_ROLE_SECURITY_RESOURCE, null, null, exports.OBJ_ID_TYPE_URI, 'Security Audit Log', objQuery, objDetails
+  );
+  var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], [participantObj], [sourceIdent]);
+  return  audit.toXML();
 };
