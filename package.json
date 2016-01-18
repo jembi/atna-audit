@@ -4,7 +4,7 @@
   "description": "Assists in the creation of ATNA audit trail messages for IHE profiles.",
   "main": "index.js",
   "scripts": {
-    "test": "node test"
+    "test": "tap --cov test.js"
   },
   "author": "Jembi Health Systems NPC",
   "license": "MPL-2.0",
@@ -12,8 +12,8 @@
     "js2xmlparser": "^1.0.0"
   },
   "devDependencies": {
-    "libxmljs": "^0.15.0",
-    "eslint": "^1.7.3"
+    "eslint": "^1.7.3",
+    "tap": "^5.0.1"
   },
   "repository": {
     "type": "git",

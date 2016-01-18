@@ -4,12 +4,8 @@ node_js:
   - 4
 sudo: false
 
-# for libxmljs
-env:
-  - CXX=g++-4.8
+# required for testing
 addons:
   apt:
-    sources:
-    - ubuntu-toolchain-r-test
     packages:
-    - g++-4.8
+    - libxml2-utils

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jembi/atna-audit.svg)](https://travis-ci.org/jembi/atna-audit)
+[![Build Status](https://travis-ci.org/jembi/atna-audit.svg)](https://travis-ci.org/jembi/atna-audit) [![codecov.io](https://codecov.io/github/jembi/atna-audit/coverage.svg?branch=master)](https://codecov.io/github/jembi/atna-audit?branch=master)
 
 # ATNA Audit Trail library
 
@@ -32,3 +32,9 @@ var sourceIdent = new atna.AuditSourceIdentification(null, sysname, sourceTypeCo
 var audit = new atna.AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
 var xml = audit.toXML();
 ```
+
+## Testing
+
+To test the code you will need `xmllint` on your PATH. `sudo apt-get install xmllint`
+
+Then run `npm test`
