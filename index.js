@@ -194,11 +194,11 @@ function AuditMessage(eventIdent, activeParticipants, participantObjs, auditSour
   if (activeParticipants && activeParticipants.length > 0) {
     this.ActiveParticipant = activeParticipants;
   }
-  if (participantObjs && participantObjs.lenght > 0) {
-    this.ParticipantObjectIdentification = participantObjs;
-  }
   if (auditSources && auditSources.length > 0) {
     this.AuditSourceIdentification = auditSources;
+  }
+  if (participantObjs && participantObjs.length > 0) {
+    this.ParticipantObjectIdentification = participantObjs;
   }
 }
 AuditMessage.prototype.constructor = AuditMessage;
@@ -257,12 +257,25 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
   return audit.toXML();
 };
 
+/**
+ * Generates a 'Audit Log Used' audit message in XML format
+ * @param  {Number} outcome       the desired outcome, for authentication failure use atna.OUTCOME_MINOR_FAILURE.
+ * @param  {String} sysname       the system name of the system that generated this audit.
+ * @param  {String} hostname      the hostname of the system that generated this audit.
+ * @param  {String} username      the username of the person viewing the audit
+ * @param  {String} userRole      the user role of the person viewing the audit
+ * @param  {String} userRoleCode  the role code of the person viewing the audit
+ * @param  {String} auditLogURI   a URI identifying the used audit message
+ * @param  {String} objQuery      participant object query. Can leave null
+ * @param  {Object} objDetails    participant object details. Should be a ValuePair object. Can leave null
+ * @return {String}               the xml of this audit message.
+ */
 exports.auditLogUsedAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode, auditLogURI, objQuery, objDetails) {
   var eventID = new Code(110101, 'Audit Log Used', 'DCM');
   var eIdent = new EventIdentification(exports.EVENT_ACTION_READ, new Date(), outcome, eventID, null);
 
   var sysRoleCode = new Code(110150, 'Application', 'DCM');
-  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
+  var sysParticipant = new ActiveParticipant(sysname, '', false, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
 
   var userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
   var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
@@ -270,8 +283,9 @@ exports.auditLogUsedAudit = function(outcome, sysname, hostname, username, userR
   var sourceTypeCode = new Code(exports.AUDIT_SRC_TYPE_UI, '', '');
   var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
+  var objIdTypeCode = new Code(exports.OBJ_ID_TYPE_URI, 'URI');
   var participantObj = new ParticipantObjectIdentification(
-    auditLogURI, exports.OBJ_TYPE_SYS_OBJ, exports.OBJ_TYPE_CODE_ROLE_SECURITY_RESOURCE, null, null, exports.OBJ_ID_TYPE_URI, 'Security Audit Log', objQuery, objDetails
+    auditLogURI, exports.OBJ_TYPE_SYS_OBJ, exports.OBJ_TYPE_CODE_ROLE_SECURITY_RESOURCE, null, null, objIdTypeCode, 'Security Audit Log', objQuery, objDetails
   );
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], [participantObj], [sourceIdent]);
   return  audit.toXML();

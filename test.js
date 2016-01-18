@@ -43,7 +43,7 @@ tap.test('App Activity audit should validate against relax ng schema', function 
 });
 
 tap.test('Audit log used audit should validate against relax ng schema', function (t) {
-  var audit = atna.auditLogUsedAudit(atna.OUTCOME_SUCCESS, 'openhim', 'openhim.org', 'testUser', 'testRole', '123');
+  var audit = atna.auditLogUsedAudit(atna.OUTCOME_SUCCESS, 'openhim', 'openhim.org', 'testUser', 'testRole', '123', 'localhost:8080/audits/1234', null, null);
   validateAudit(audit, function (err, valid) {
     t.error(err);
     t.ok(valid);
