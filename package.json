@@ -4,7 +4,9 @@
   "description": "Assists in the creation of ATNA audit trail messages for IHE profiles.",
   "main": "index.js",
   "scripts": {
-    "test": "tap --cov test.js"
+    "pretest": "npm run gen:rng",
+    "test": "tap --cov test.js",
+    "gen:rng": "sed 's/#.*//' dicom.rnc > temp.rnc && trang temp.rnc dicom.rng && rm temp.rnc"
   },
   "author": "Jembi Health Systems NPC",
   "license": "MPL-2.0",
