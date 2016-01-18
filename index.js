@@ -266,11 +266,10 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
  * @param  {String} userRole      the user role of the person viewing the audit
  * @param  {String} userRoleCode  the role code of the person viewing the audit
  * @param  {String} auditLogURI   a URI identifying the used audit message
- * @param  {String} objQuery      participant object query. Can leave null
- * @param  {Object} objDetails    participant object details. Should be a ValuePair object. Can leave null
+ * @param  {Object} objDetails    (optional) participant object details. Should be a ValuePair object
  * @return {String}               the xml of this audit message.
  */
-exports.auditLogUsedAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode, auditLogURI, objQuery, objDetails) {
+exports.auditLogUsedAudit = function(outcome, sysname, hostname, username, userRole, userRoleCode, auditLogURI, objDetails) {
   var eventID = new Code(110101, 'Audit Log Used', 'DCM');
   var eIdent = new EventIdentification(exports.EVENT_ACTION_READ, new Date(), outcome, eventID, null);
 
@@ -285,7 +284,7 @@ exports.auditLogUsedAudit = function(outcome, sysname, hostname, username, userR
 
   var objIdTypeCode = new Code(exports.OBJ_ID_TYPE_URI, 'URI');
   var participantObj = new ParticipantObjectIdentification(
-    auditLogURI, exports.OBJ_TYPE_SYS_OBJ, exports.OBJ_TYPE_CODE_ROLE_SECURITY_RESOURCE, null, null, objIdTypeCode, 'Security Audit Log', objQuery, objDetails
+    auditLogURI, exports.OBJ_TYPE_SYS_OBJ, exports.OBJ_TYPE_CODE_ROLE_SECURITY_RESOURCE, null, null, objIdTypeCode, 'Security Audit Log', objDetails
   );
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], [participantObj], [sourceIdent]);
   return  audit.toXML();
