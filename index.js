@@ -265,7 +265,7 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
 
 /**
  * Generates a 'Audit Log Used' audit message in XML format
- * @param  {Number} outcome       the desired outcome, for authentication failure use atna.OUTCOME_MINOR_FAILURE.
+ * @param  {Number} outcome       the desired outcome, e.g. atna.OUTCOME_SUCCESS.
  * @param  {String} sysname       the system name of the system that generated this audit.
  * @param  {String} hostname      the hostname of the system that generated this audit.
  * @param  {String} username      the username of the person viewing the audit
