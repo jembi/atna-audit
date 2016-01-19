@@ -41,3 +41,12 @@ tap.test('App Activity audit should validate against relax ng schema', function 
     t.end();
   });
 });
+
+tap.test('Node authentication audit should validate against relax ng schema', function (t) {
+  var audit = atna.nodeAuthentication('1.2.3.4', 'openhim', 'openhim.org', atna.OUTCOME_MINOR_FAILURE);
+  validateAudit(audit, function (err, valid) {
+    t.error(err);
+    t.ok(valid);
+    t.end();
+  });
+});

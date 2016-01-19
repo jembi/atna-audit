@@ -68,17 +68,23 @@ Code.prototype.toXML = function() {
 };
 exports.Code = Code;
 
-function TypeValue(type, val) {
+/**
+ * ValuePair class
+ *  
+ * @param  {String} type the type 
+ * @param  {String} val  the value, this will be automatically base64 encoded 
+ */ 
+function ValuePair(type, val) {
   this['@'] = {
     type: type,
-    value: val
+    value: new Buffer(val).toString('base64')
   };
 }
-TypeValue.prototype.constructor = TypeValue;
-TypeValue.prototype.toXML = function() {
-  return js2xml('TypeValue', this);
+ValuePair.prototype.constructor = ValuePair;
+ValuePair.prototype.toXML = function() {
+  return js2xml('ValuePair', this);
 };
-exports.TypeValue = TypeValue;
+exports.ValuePair = ValuePair;
 
 function EventIdentification(actionCode, datetime, outcome, eventID, typeCode) {
   this['@'] = {
@@ -169,11 +175,11 @@ function AuditMessage(eventIdent, activeParticipants, participantObjs, auditSour
   if (activeParticipants && activeParticipants.length > 0) {
     this.ActiveParticipant = activeParticipants;
   }
-  if (participantObjs && participantObjs.lenght > 0) {
-    this.ParticipantObjectIdentification = participantObjs;
-  }
   if (auditSources && auditSources.length > 0) {
     this.AuditSourceIdentification = auditSources;
+  }
+  if (participantObjs && participantObjs.length > 0) {
+    this.ParticipantObjectIdentification = participantObjs;
   }
 }
 AuditMessage.prototype.constructor = AuditMessage;
@@ -193,7 +199,7 @@ exports.userLoginAudit = function(outcome, sysname, hostname, username, userRole
   var eIdent = new EventIdentification(exports.EVENT_ACTION_EXECUTE, new Date(), outcome, eventID, typeCode);
 
   var sysRoleCode = new Code(110150, 'Application', 'DCM');
-  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
+  var sysParticipant = new ActiveParticipant(sysname, '', false, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
 
   var userRoleCodeDef = new Code(userRole, userRole, userRoleCode);
   var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
@@ -220,7 +226,7 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
   var eIdent = new EventIdentification(exports.EVENT_ACTION_EXECUTE, new Date(), exports.OUTCOME_SUCCESS, eventID, typeCode);
 
   var sysRoleCode = new Code(110150, 'Application', 'DCM');
-  var sysParticipant = new ActiveParticipant(sysname, '', true, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
+  var sysParticipant = new ActiveParticipant(sysname, '', false, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
 
   var userRoleCodeDef = new Code(110151, 'Application Launcher', 'DCM');
   var userParticipant = new ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
@@ -229,5 +235,32 @@ exports.appActivityAudit = function(isStart, sysname, hostname, username) {
   var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
 
   var audit = new AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
+  return audit.toXML();
+};
+
+/**
+ * Generates a node authentication audit.
+ *  
+ * @param  {String} nodeIP    the IP address of the node that attempted authentication.
+ * @param  {String} sysname   the system name of the system that generated this audit.
+ * @param  {String} hostname  the hostname of the system that generated this audit.
+ * @param  {Number} outcome   the desired outcome, for authentication failure use atna.OUTCOME_MINOR_FAILURE.
+ * @return {String}           the xml of this audit message.
+ */ 
+exports.nodeAuthentication = function (nodeIP, sysname, hostname, outcome) {
+  var eventID = new Code(110113, 'Security Alert', 'DCM');
+  var typeCode = new Code(110126, 'Node Authentication', 'DCM');
+  var eIdent = new EventIdentification(exports.EVENT_ACTION_EXECUTE, new Date(), outcome, eventID, typeCode);
+  
+  var sysRoleCode = new Code(110150, 'Application', 'DCM');
+  var sysParticipant = new ActiveParticipant(sysname, '', false, hostname, exports.NET_AP_TYPE_DNS, [sysRoleCode]);
+
+  var objIdTypeCode = new Code(110182, 'Node ID', 'DCM');
+  var nodeParticipant = new ParticipantObjectIdentification(nodeIP, 2, null, null, null, objIdTypeCode, nodeIP, null, null);
+  
+  var sourceTypeCode = new Code(exports.AUDIT_SRC_TYPE_WEB_SERVER, '', '');
+  var sourceIdent = new AuditSourceIdentification(null, sysname, sourceTypeCode);
+  
+  var audit = new AuditMessage(eIdent, [sysParticipant], [nodeParticipant], [sourceIdent]);
   return audit.toXML();
 };

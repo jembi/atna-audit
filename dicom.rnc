@@ -109,12 +109,12 @@ DICOMObjectDescriptionContents =
     }*,
     attribute UID { token }?,     # OID pattern="[0-2]((\.0)|(\.[1-9][0-9]*))*"
     attribute NumberOfInstances { xsd:integer }
-  },
+  }?,
   element ParticipantObjectContainsStudy {
     element StudyIDs {
       attribute UID { token }
     }*
-  },
+  }?,
   element Encrypted { xsd:boolean }?,
   element Anonymized { xsd:boolean }?
 
