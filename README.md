@@ -35,6 +35,6 @@ var xml = audit.toXML();
 
 ## Testing
 
-To test the code you will need `xmllint` and `trang` on your PATH. `sudo apt-get install xmllint trang`
+To test the code you will need `xmllint` and `trang` on your PATH. `sudo apt-get install libxml2-utils trang`
 
 Then run `npm test`

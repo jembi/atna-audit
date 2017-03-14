@@ -2,6 +2,9 @@
 
 var js2xml = require('js2xmlparser');
 var os = require('os');
+var dgram = require('dgram')
+var net = require('net')
+var tls = require('tls')
 
 // Event Outcome Indicator
 exports.OUTCOME_SUCCESS = 0;
@@ -321,4 +324,78 @@ exports.nodeAuthentication = function (nodeIP, sysname, hostname, outcome) {
   
   var audit = new AuditMessage(eIdent, [sysParticipant], [nodeParticipant], [sourceIdent]);
   return audit.toXML();
+};
+
+
+
+
+
+
+
+
+
+
+
+const sendUDPAudit = function(msg, host, port, callback) {
+  const client = dgram.createSocket('udp4');
+
+  return client.send(msg, 0, msg.length, port, host, function(err) {
+    client.close();
+    return callback(err);
+  });
+};
+
+const sendTLSAudit = function(msg, host, port, options, callback) {
+
+  const client = tls.connect(port, host, options, function() {
+    if (!client.authorized) {
+      return callback(client.authorizationError);
+    }
+    client.write(msg.length + " " + msg);
+    return client.end();
+  });
+  client.on('error', function(err) {
+    // return logger.error(err);
+    return callback(err)
+  });
+  return client.on('close', function() {
+    return callback();
+  });
+};
+
+const sendTCPAudit = function(msg, host, port, callback) {
+  const client = net.connect(port, host, function() {
+    client.write(msg.length + " " + msg);
+    return client.end();
+  });
+  client.on('error', function(err) {
+    // return logger.error(err);
+    return callback(err)
+  });
+  return client.on('close', function() {
+    return callback();
+  });
+};
+
+exports.sendAuditEvent = function(msg, connDetail, callback) {
+  if (callback == null) {
+    callback = (function() {});
+  }
+  var done = function(err) {
+    if (err) {
+      return callback(err)
+    }
+    return callback();
+  };
+  
+  switch (connDetail.interface) {
+    case 'udp':
+      return sendUDPAudit(msg, connDetail.host, connDetail.port, done);
+    case 'tls':
+      return sendTLSAudit(msg, connDetail.host, connDetail.port, connDetail.options, done);
+    case 'tcp':
+      return sendTCPAudit(msg, connDetail.host, connDetail.port, done);
+    default:
+      return done(new Error("Invalid audit event interface '" + connDetail.interface + "'"));
+  }
 };
