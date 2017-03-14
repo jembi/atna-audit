@@ -88,7 +88,7 @@ function Code(code, originalText, codeSystemName, displayName) {
     this['@'].displayName = displayName;
   }
 }
-Code.prototype.varructor = Code;
+Code.prototype.constructor = Code;
 Code.prototype.toXML = function() {
   return js2xml('Code', this);
 };
@@ -106,7 +106,7 @@ function ValuePair(type, val) {
     value: new Buffer(val).toString('base64')
   };
 }
-ValuePair.prototype.varructor = ValuePair;
+ValuePair.prototype.constructor = ValuePair;
 ValuePair.prototype.toXML = function() {
   return js2xml('ValuePair', this);
 };
@@ -123,7 +123,7 @@ function EventIdentification(actionCode, datetime, outcome, eventID, typeCode) {
     this.EventTypeCode = typeCode;
   }
 }
-EventIdentification.prototype.varructor = EventIdentification;
+EventIdentification.prototype.constructor = EventIdentification;
 EventIdentification.prototype.toXML = function() {
   return js2xml('EventIdentification', this);
 };
@@ -143,7 +143,7 @@ function ActiveParticipant(userId, altUserId, userIsRequestor, netAccessPointId,
   }
   this.RoleIDCode = roleCodes;
 }
-ActiveParticipant.prototype.varructor = ActiveParticipant;
+ActiveParticipant.prototype.constructor = ActiveParticipant;
 ActiveParticipant.prototype.toXML = function() {
   return js2xml('ActiveParticipant', this);
 };
@@ -175,7 +175,7 @@ function ParticipantObjectIdentification(objId, objTypeCode, objTypeCodeRole, ob
     this.ParticipantObjectDetail = objDetails;
   }
 }
-ParticipantObjectIdentification.prototype.varructor = ParticipantObjectIdentification;
+ParticipantObjectIdentification.prototype.constructor = ParticipantObjectIdentification;
 ParticipantObjectIdentification.prototype.toXML = function() {
   return js2xml('ParticipantObjectIdentification', this);
 };
@@ -190,7 +190,7 @@ function AuditSourceIdentification(auditEnterpriseSiteId, auditSourceId, auditSo
     originalText: auditSourceTypeCode['@'].originalText
   };
 }
-AuditSourceIdentification.prototype.varructor = AuditSourceIdentification;
+AuditSourceIdentification.prototype.constructor = AuditSourceIdentification;
 AuditSourceIdentification.prototype.toXML = function() {
   return js2xml('AuditSourceIdentification', this);
 };
@@ -210,7 +210,7 @@ function AuditMessage(eventIdent, activeParticipants, participantObjs, auditSour
     this.ParticipantObjectIdentification = participantObjs;
   }
 }
-AuditMessage.prototype.varructor = AuditMessage;
+AuditMessage.prototype.constructor = AuditMessage;
 AuditMessage.prototype.toXML = function() {
   return js2xml('AuditMessage', this);
 };
