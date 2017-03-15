@@ -43,16 +43,16 @@ var setupUDPserver = function (port, callback) {
 
 var setupTLSserver = function (port, callback) {
   var options = {
-    key: fs.readFileSync('./tests/resources/server-tls/cert.pem').toString(),
+    key: fs.readFileSync('./tests/resources/server-tls/key.pem').toString(),
     cert: fs.readFileSync('./tests/resources/server-tls/cert.pem').toString(),
+    ca: [fs.readFileSync('./tests/resources/server-tls/cert.pem').toString()],
     requestCert: true,
     rejectUnauthorized: true,
     secureProtocol: 'TLSv1_method'
   };
-  console.log(options)
 
-  server = tls.createServer(options, function(sock) {
-    return sock.on('data', function(data) {
+  var server = tls.createServer(options, function(sock) {
+    sock.on('data', function(data) {
       server.close();
     });
   });
@@ -64,7 +64,7 @@ var setupTLSserver = function (port, callback) {
 
 var setupTCPserver = function (port, callback) {
   var server = net.createServer(function(sock) {
-    return sock.on('data', function(data) {
+    sock.on('data', function(data) {
       server.close();
     });
   });
@@ -99,7 +99,7 @@ tap.test('should send the Audit via UDP', function (t) {
   })
 });
 
-/* tap.test('should send the Audit via TLS', function (t) {
+tap.test('should send the Audit via TLS', function (t) {
   setupConfig(function (config) {
     config.interface = 'tls'
     config.port = 6051
@@ -115,7 +115,7 @@ tap.test('should send the Audit via UDP', function (t) {
   });
 });
 
-tap.test('should send the Audit via TLS and fail - Certificate not valid - Self Signed', function (t) {
+/* tap.test('should send the Audit via TLS and fail - Certificate not valid - Self Signed', function (t) {
   setupConfig(function (config) {
     config.interface = 'tls'
     config.port = 5051
