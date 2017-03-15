@@ -14,7 +14,8 @@ var setupConfig = function (callback) {
     port: 5050,
     options: {
       key: fs.readFileSync('./tests/resources/client-tls/key.pem').toString(),
-      cert: fs.readFileSync('./tests/resources/client-tls/cert.pem').toString()
+      cert: fs.readFileSync('./tests/resources/client-tls/cert.pem').toString(),
+      ca: fs.readFileSync('./tests/resources/server-tls/cert.pem').toString(),
     }
   }
 
@@ -45,9 +46,8 @@ var setupTLSserver = function (port, callback) {
   var options = {
     key: fs.readFileSync('./tests/resources/server-tls/key.pem').toString(),
     cert: fs.readFileSync('./tests/resources/server-tls/cert.pem').toString(),
-    ca: [fs.readFileSync('./tests/resources/server-tls/cert.pem').toString()],
     requestCert: true,
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
     secureProtocol: 'TLSv1_method'
   };
 
@@ -104,10 +104,11 @@ tap.test('should send the Audit via TLS', function (t) {
     config.interface = 'tls'
     config.port = 6051
     config.options.requestCert = true
-    config.options.rejectUnauthorized = true
+    config.options.rejectUnauthorized = false
 
     setupTLSserver(config.port, function () {
       ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+        console.log('in here')
         t.error(err);
         t.end();
       });
@@ -115,7 +116,7 @@ tap.test('should send the Audit via TLS', function (t) {
   });
 });
 
-/* tap.test('should send the Audit via TLS and fail - Certificate not valid - Self Signed', function (t) {
+tap.test('should send the Audit via TLS and fail - Certificate not valid - Self Signed', function (t) {
   setupConfig(function (config) {
     config.interface = 'tls'
     config.port = 5051
@@ -143,7 +144,7 @@ tap.test('should send the Audit via TLS and fail - Certificate not valid', funct
       t.end();
     });
   });
-}); */
+});
 
 tap.test('should send the Audit via TCP', function (t) {
   setupConfig(function (config) {
