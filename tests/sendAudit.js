@@ -3,6 +3,9 @@
 var ATNA = require('../index');
 var tap = require('tap');
 var fs = require('fs');
+var dgram = require('dgram');
+var net = require('net')
+var tls = require('tls')
 
 const getFileContent = (path) => {
   if (!path) {
@@ -31,6 +34,38 @@ var setupConfig = function (callback) {
   callback(connDetails)
 }
 
+var setupUDPserver = function (port, callback) {
+  var server = dgram.createSocket('udp4');
+
+  server.bind({
+    port: port
+  });
+
+  server.on('listening', function() {
+    callback()
+  });
+
+  server.on('message', function(msg, rinfo) {
+    server.close();
+  })
+
+  server.on('error', function (err) {
+    callback(err)
+  });
+}
+
+var setupTCPserver = function (port, callback) {
+  var server = net.createServer(function(sock) {
+    return sock.on('data', function(data) {
+      server.close();
+    });
+  });
+
+  server.listen(port, 'localhost', function() {
+    callback();
+  });
+}
+
 tap.test('should throw an error for an invalid interface type', function (t) {
   setupConfig(function (config) {
     config.interface = 'NOTVALID'
@@ -45,13 +80,15 @@ tap.test('should throw an error for an invalid interface type', function (t) {
 tap.test('should send the Audit via UDP', function (t) {
   setupConfig(function (config) {
     config.interface = 'udp'
-    config.port = 5050
+    config.port = 6050
 
-    ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
-      t.error(err);
-      t.end();
+    setupUDPserver(config.port, function () {
+      ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+        t.error(err);
+        t.end();
+      });
     });
-  });
+  })
 });
 
 /*tap.test('should send the Audit via TLS', function (t) {
@@ -101,11 +138,13 @@ tap.test('should send the Audit via TLS and fail - Certificate not valid', funct
 tap.test('should send the Audit via TCP', function (t) {
   setupConfig(function (config) {
     config.interface = 'tcp'
-    config.port = 5052
+    config.port = 6052
 
-    ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
-      t.error(err);
-      t.end();
+    setupTCPserver(config.port, function () {
+      ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+        t.error(err);
+        t.end();
+      });
     });
   });
 });
