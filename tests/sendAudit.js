@@ -7,7 +7,7 @@ var dgram = require('dgram');
 var net = require('net')
 var tls = require('tls')
 
-const getFileContent = (path) => {
+var getFileContent = (path) => {
   if (!path) {
     return
   }
