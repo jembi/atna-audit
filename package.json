@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "npm run gen:rng",
-    "test": "tap --cov --reporter=spec test.js",
+    "test": "tap --cov --reporter=spec tests/**.js",
     "gen:rng": "sed 's/#.*//' dicom.rnc > temp.rnc && trang temp.rnc dicom.rng && rm temp.rnc",
     "cov": "npm run test:code -- --coverage-report=lcov",
     "test:upload-cov": "tap --coverage-report=lcov && codecov"
