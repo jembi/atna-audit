@@ -7,7 +7,7 @@ var dgram = require('dgram');
 var net = require('net')
 var tls = require('tls')
 
-var getFileContent = (path) => {
+var getFileContent = function (path) {
   if (!path) {
     return
   }
@@ -51,6 +51,18 @@ var setupUDPserver = function (port, callback) {
 
   server.on('error', function (err) {
     callback(err)
+  });
+}
+
+var setupTLSserver = function (port, callback) {
+  var server = net.createServer(function(sock) {
+    return sock.on('data', function(data) {
+      server.close();
+    });
+  });
+
+  server.listen(port, 'localhost', function() {
+    callback();
   });
 }
 
