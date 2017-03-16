@@ -1,12 +1,14 @@
 {
   "name": "atna-audit",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "Assists in the creation of ATNA audit trail messages for IHE profiles.",
   "main": "index.js",
   "scripts": {
     "pretest": "npm run gen:rng",
-    "test": "tap --cov test.js",
-    "gen:rng": "sed 's/#.*//' dicom.rnc > temp.rnc && trang temp.rnc dicom.rng && rm temp.rnc"
+    "test": "tap --cov --reporter=spec tests/**.js",
+    "gen:rng": "sed 's/#.*//' dicom.rnc > temp.rnc && trang temp.rnc dicom.rng && rm temp.rnc",
+    "cov": "npm run test:code -- --coverage-report=lcov",
+    "test:upload-cov": "tap --coverage-report=lcov && codecov"
   },
   "author": "Jembi Health Systems NPC",
   "license": "MPL-2.0",
@@ -14,6 +16,7 @@
     "js2xmlparser": "^1.0.0"
   },
   "devDependencies": {
+    "codecov": "^1.0.1",
     "eslint": "^1.7.3",
     "tap": "^5.0.1"
   },
