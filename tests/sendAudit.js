@@ -22,7 +22,7 @@ var setupConfig = function (callback) {
   callback(connDetails)
 }
 
-var setupUDPserver = function (port, callback) {
+var setupUDPserver = function (t, originalMsg, port, callback) {
   var server = dgram.createSocket('udp4');
 
   server.bind({
@@ -33,8 +33,10 @@ var setupUDPserver = function (port, callback) {
     callback()
   });
 
-  server.on('message', function(msg, rinfo) {
+  server.on('message', function(data, rinfo) {
+    t.equals(data.toString(), originalMsg, 'should receive the same message that was sent')
     server.close();
+    t.end()
   })
 
   server.on('error', function (err) {
@@ -42,7 +44,7 @@ var setupUDPserver = function (port, callback) {
   });
 }
 
-var setupTLSserver = function (port, callback) {
+var setupTLSserver = function (t, originalMsg, port, callback) {
   var options = {
     key: fs.readFileSync('./tests/resources/server-tls/key.pem').toString(),
     cert: fs.readFileSync('./tests/resources/server-tls/cert.pem').toString(),
@@ -53,7 +55,18 @@ var setupTLSserver = function (port, callback) {
 
   var server = tls.createServer(options, function(sock) {
     sock.on('data', function(data) {
-      server.close();
+      var message = ''
+      message += data.toString()
+      var lengthIndex = message.indexOf(" ")
+      var lengthValue = message.substr(0, lengthIndex)
+      var length = parseInt(lengthValue.trim())
+      var message = message.substr(lengthIndex + 1)
+
+      if (length === Buffer.byteLength(message)) {
+        console.log('aasas')
+        t.equals(message.toString(), originalMsg, 'should receive the same message that was sent')
+        server.close();
+      }      
     });
   });
 
@@ -62,10 +75,20 @@ var setupTLSserver = function (port, callback) {
   });
 }
 
-var setupTCPserver = function (port, callback) {
+var setupTCPserver = function (t, originalMsg, port, callback) {
   var server = net.createServer(function(sock) {
     sock.on('data', function(data) {
-      server.close();
+      var message = ''
+      message += data.toString()
+      var lengthIndex = message.indexOf(" ")
+      var lengthValue = message.substr(0, lengthIndex)
+      var length = parseInt(lengthValue.trim())
+      var message = message.substr(lengthIndex + 1)
+
+      if (length === Buffer.byteLength(message)) {
+        t.equals(message.toString(), originalMsg, 'should receive the same message that was sent')
+        server.close();
+      }
     });
   });
 
@@ -78,7 +101,9 @@ tap.test('should throw an error for an invalid interface type', function (t) {
   setupConfig(function (config) {
     config.interface = 'NOTVALID'
 
-    ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+    var msg = 'This is a test message'
+
+    ATNA.send.sendAuditEvent(msg, config, function (err) {
       t.ok(err);
       t.end();
     });
@@ -90,13 +115,14 @@ tap.test('should send the Audit via UDP', function (t) {
     config.interface = 'udp'
     config.port = 6050
 
-    setupUDPserver(config.port, function () {
-      ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+    var msg = 'This is a test message'
+
+    setupUDPserver(t, msg, config.port, function () {
+      ATNA.send.sendAuditEvent(msg, config, function (err) {
         t.error(err);
-        t.end();
       });
     });
-  })
+  });
 });
 
 tap.test('should send the Audit via TLS', function (t) {
@@ -106,11 +132,12 @@ tap.test('should send the Audit via TLS', function (t) {
     config.options.requestCert = true
     config.options.rejectUnauthorized = false
 
-    setupTLSserver(config.port, function () {
-      ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
-        console.log('in here')
+    var msg = 'This is a test message'
+
+    setupTLSserver(t, msg, config.port, function () {
+      ATNA.send.sendAuditEvent(msg, config, function (err) {
         t.error(err);
-        t.end();
+        t.end()
       });
     });
   });
@@ -123,7 +150,9 @@ tap.test('should send the Audit via TLS and fail - Certificate not valid - Self 
     config.options.requestCert = true
     config.options.rejectUnauthorized = true
 
-    ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+    var msg = 'This is a test message'
+
+    ATNA.send.sendAuditEvent(msg, config, function (err) {
       t.ok(err);
       t.end();
     });
@@ -139,7 +168,9 @@ tap.test('should send the Audit via TLS and fail - Certificate not valid', funct
       cert: null
     }
 
-    ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+    var msg = 'This is a test message'
+
+    ATNA.send.sendAuditEvent(msg, config, function (err) {
       t.ok(err);
       t.end();
     });
@@ -151,10 +182,12 @@ tap.test('should send the Audit via TCP', function (t) {
     config.interface = 'tcp'
     config.port = 6052
 
-    setupTCPserver(config.port, function () {
-      ATNA.send.sendAuditEvent('This is a test message', config, function (err) {
+    var msg = 'This is a test message'
+
+    setupTCPserver(t, msg, config.port, function () {
+      ATNA.send.sendAuditEvent(msg, config, function (err) {
         t.error(err);
-        t.end();
+        t.end()
       });
     });
   });
