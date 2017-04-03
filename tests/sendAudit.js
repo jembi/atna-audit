@@ -63,7 +63,6 @@ var setupTLSserver = function (t, originalMsg, port, callback) {
       var message = message.substr(lengthIndex + 1)
 
       if (length === Buffer.byteLength(message)) {
-        console.log('aasas')
         t.equals(message.toString(), originalMsg, 'should receive the same message that was sent')
         server.close();
       }      
