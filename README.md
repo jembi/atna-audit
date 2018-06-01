@@ -13,7 +13,7 @@ $ npm install --save atna-audit
 Use the simple convenience function as follows:
 
 ```js
-var audit = atna.construct.userLoginAudit(atna.OUTCOME_SUCCESS, 'openhim', 'x.x.x.x', 'testUser', 'testRole', '123');
+var audit = atna.construct.userLoginAudit(atna.constants.OUTCOME_SUCCESS, 'openhim', 'x.x.x.x', 'testUser', 'testRole', '123');
 var syslog = atna.construct.wrapInSyslog(audit);
 ```
 
@@ -22,12 +22,12 @@ Or construct your own custom audits like this:
 ```js
 var eventID = new atna.construct.Code(110114, 'UserAuthenticated', 'DCM');
 var typeCode = new atna.construct.Code(110122, 'Login', 'DCM');
-var eIdent = new atna.construct.EventIdentification(atna.EVENT_ACTION_EXECUTE, new Date(), atna.OUTCOME_SUCCESS, eventID, typeCode);
+var eIdent = new atna.construct.EventIdentification(atna.constants.EVENT_ACTION_EXECUTE, new Date(), atna.constants.OUTCOME_SUCCESS, eventID, typeCode);
 var sysRoleCode = new atna.construct.Code(110150, 'Application', 'DCM');
-var sysParticipant = new atna.construct.ActiveParticipant(sysname, '', true, sysIp, atna.NET_AP_TYPE_IP, [sysRoleCode]);
+var sysParticipant = new atna.construct.ActiveParticipant(sysname, '', true, sysIp, atna.constants.NET_AP_TYPE_IP, [sysRoleCode]);
 var userRoleCodeDef = new atna.construct.Code(userRole, userRole, userRoleCode);
 var userParticipant = new atna.construct.ActiveParticipant(username, '', true, null, null, [userRoleCodeDef]);
-var sourceTypeCode = new atna.construct.Code(atna.AUDIT_SRC_TYPE_UI, '', '');
+var sourceTypeCode = new atna.construct.Code(atna.constants.AUDIT_SRC_TYPE_UI, '', '');
 var sourceIdent = new atna.construct.AuditSourceIdentification(null, sysname, sourceTypeCode);
 var audit = new atna.construct.AuditMessage(eIdent, [sysParticipant, userParticipant], null, [sourceIdent]);
 var xml = audit.toXML();
